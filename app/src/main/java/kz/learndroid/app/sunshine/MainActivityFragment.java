@@ -1,5 +1,6 @@
 package kz.learndroid.app.sunshine;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
@@ -12,8 +13,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -60,6 +63,17 @@ public class MainActivityFragment extends Fragment {
 
         ListView forecast = (ListView) rootView.findViewById(R.id.listview_forecast);
         forecast.setAdapter(mForecastAdapter);
+
+        forecast.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //Toast.makeText(getActivity(), "Мы нажали на позицию " + position, Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(getActivity(), DetailActivity.class);
+                String detailWeather = (String) mForecastAdapter.getItem(position);
+                intent.putExtra(Intent.EXTRA_TEXT, detailWeather);
+                startActivity(intent);
+            }
+        });
 
         return rootView;
     }
