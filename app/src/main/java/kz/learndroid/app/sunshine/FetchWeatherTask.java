@@ -188,7 +188,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
                 try {
                     reader.close();
                 } catch (final IOException e) {
-                    Log.e("MainActivityFragment", "Error closing stream", e);
+                    Log.e("ForecastFragment", "Error closing stream", e);
                 }
             }
         }

@@ -2,6 +2,8 @@ package kz.learndroid.app.sunshine;
 
 import android.app.LauncherActivity;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
@@ -34,15 +36,26 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import kz.learndroid.app.sunshine.data.WeatherContract;
+import kz.learndroid.app.sunshine.data.WeatherDbHelper;
+
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainActivityFragment extends Fragment implements AdapterView.OnItemClickListener {
+public class ForecastFragment extends Fragment implements AdapterView.OnItemClickListener {
 
-    public MainActivityFragment() {
+    public ForecastFragment() {
     }
 
-    ArrayAdapter mForecastAdapter;
+    ForecastAdapter mForecastAdapter;
+    WeatherDbHelper dbHelper;
+    SQLiteDatabase db;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        dbHelper = new WeatherDbHelper(getActivity());
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -50,17 +63,39 @@ public class MainActivityFragment extends Fragment implements AdapterView.OnItem
         setHasOptionsMenu(true);
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        String[] weather = {
-                "Today - Cloudy - 8/6",
-                "Sunday - Sunny - 10/12",
-                "Monday - Cloudy - 8/6",
-                "Tuesday - Cloudy - 8/6",
-                "Wednesday - Cloudy - 8/6",
-                "Thursday - Cloudy - 8/6",
-                "Friday - Cloudy - 8/6"
+        db = dbHelper.getReadableDatabase();
+
+        String columns[] = {
+                WeatherContract.WeatherEntry._ID,
+                WeatherContract.WeatherEntry.COLUMN_DATE,
+                WeatherContract.WeatherEntry.COLUMN_SHORT_DESC,
+                WeatherContract.WeatherEntry.COLUMN_MIN_TEMP,
+                WeatherContract.WeatherEntry.COLUMN_MAX_TEMP
         };
-        List weekForecast = new ArrayList(Arrays.asList(weather));
-        mForecastAdapter = new ArrayAdapter(getActivity(), R.layout.list_item_forecast, R.id.textview_forecast, weekForecast);
+
+        Cursor locId = db.query(
+                WeatherContract.LocationEntry.TABLE_NAME,
+                new String[]{WeatherContract.LocationEntry._ID},
+                WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING + " = ?",
+                new String[]{"Almaty"},
+                null,
+                null,
+                null
+        );
+        locId.moveToFirst();
+        long locationId = locId.getLong(0);
+
+        Cursor weatherData = db.query(
+                WeatherContract.WeatherEntry.TABLE_NAME,
+                columns,
+                WeatherContract.WeatherEntry.COLUMN_LOC_KEY + " = ?",
+                new String[] {String.valueOf(locationId)},
+                null,
+                null,
+                WeatherContract.WeatherEntry.COLUMN_DATE
+        );
+        //mForecastAdapter = new ArrayAdapter(getActivity(), R.layout.list_item_forecast, R.id.textview_forecast, weekForecast);
+        mForecastAdapter = new ForecastAdapter(getActivity(), weatherData, 0);
 
         ListView forecast = (ListView) rootView.findViewById(R.id.listview_forecast);
         forecast.setAdapter(mForecastAdapter);
@@ -92,19 +127,24 @@ public class MainActivityFragment extends Fragment implements AdapterView.OnItem
         int id = item.getItemId();
 
         if (id == R.id.action_refresh) {
-            FetchWeatherTask task = new FetchWeatherTask(getActivity());
-            task.execute("Astana");
+            updateWeather();
         }
 
         return true;
+    }
+
+    private void updateWeather() {
+        FetchWeatherTask task = new FetchWeatherTask(getActivity());
+        task.execute("Astana");
     }
 
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Intent intent = new Intent(getActivity(), DetailActivity.class);
-        String detailWeather = (String) mForecastAdapter.getItem(position);
-        intent.putExtra(Intent.EXTRA_TEXT, detailWeather);
+        Cursor c = (Cursor) mForecastAdapter.getItem(position);
+        long id_weather = c.getLong(0);
+        intent.putExtra(Intent.EXTRA_TEXT, id_weather);
         startActivity(intent);
 
     }

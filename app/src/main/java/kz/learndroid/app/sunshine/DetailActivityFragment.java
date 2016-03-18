@@ -23,9 +23,9 @@ public class DetailActivityFragment extends Fragment {
 
         TextView detailText = (TextView) rootView.findViewById(R.id.detail_text);
         Intent intent = getActivity().getIntent();
-        String detailWeather = intent.getStringExtra(Intent.EXTRA_TEXT);
+        long id_weather = intent.getLongExtra(Intent.EXTRA_TEXT, 0);
 
-        detailText.setText(detailWeather);
+        detailText.setText(String.valueOf(id_weather));
 
         return rootView;
     }
