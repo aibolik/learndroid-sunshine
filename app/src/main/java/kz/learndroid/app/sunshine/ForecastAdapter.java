@@ -6,6 +6,7 @@ import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -22,35 +23,46 @@ public class ForecastAdapter extends CursorAdapter {
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         View view = LayoutInflater.from(context).inflate(R.layout.list_item_forecast, parent, false);
+
+        ViewHolder viewHolder = new ViewHolder(view);
+
+        view.setTag(viewHolder);
+
         return view;
     }
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        TextView tv = (TextView)view;
-        String text = convertCursorRowToUXFormat(cursor);
-        tv.setText(text);
+
+        ViewHolder viewHolder = (ViewHolder) view.getTag();
+
+
+        long dateInMillis = cursor.getLong(ForecastFragment.COL_DATE);
+        String friendlyDate = Utility.getFriendlyDayString(context, dateInMillis);
+        String shortDesc = cursor.getString(ForecastFragment.COL_SHORT_DESC);
+        int highTemp = cursor.getInt(ForecastFragment.COL_MAX_TEMP);
+        int lowTemp = cursor.getInt(ForecastFragment.COL_MIN_TEMP);
+
+        viewHolder.dateTextView.setText(friendlyDate);
+        viewHolder.forecastTextView.setText(shortDesc);
+        viewHolder.highTempTextView.setText(context.getString(R.string.format_temperature, highTemp));
+        viewHolder.lowTempTextView.setText(context.getString(R.string.format_temperature, lowTemp));
     }
 
-    private String convertCursorRowToUXFormat(Cursor cursor) {
-        // get row indices for our cursor
-        int idx_max_temp = cursor.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_MAX_TEMP);
-        int idx_min_temp = cursor.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_MIN_TEMP);
-        int idx_date = cursor.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_DATE);
-        int idx_short_desc = cursor.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_SHORT_DESC);
+    class ViewHolder {
+        ImageView iconView;
+        TextView forecastTextView;
+        TextView dateTextView;
+        TextView highTempTextView;
+        TextView lowTempTextView;
 
-        String highAndLow = formatHighLows(
-                cursor.getDouble(idx_max_temp),
-                cursor.getDouble(idx_min_temp));
-
-        return Utility.formatDate(cursor.getLong(idx_date)) +
-                " - " + cursor.getString(idx_short_desc) +
-                " - " + highAndLow;
-    }
-
-    private String formatHighLows(double high, double low) {
-        String highLowStr = Utility.formatTemperature(high) + "/" + Utility.formatTemperature(low);
-        return highLowStr;
+        public ViewHolder(View view) {
+            iconView = (ImageView) view.findViewById(R.id.list_item_icon);
+            dateTextView = (TextView) view.findViewById(R.id.list_item_date_textview);
+            forecastTextView = (TextView) view.findViewById(R.id.list_item_forecast_textview);
+            highTempTextView = (TextView) view.findViewById(R.id.list_item_high_textview);
+            lowTempTextView = (TextView) view.findViewById(R.id.list_item_low_textview);
+        }
     }
 
 }

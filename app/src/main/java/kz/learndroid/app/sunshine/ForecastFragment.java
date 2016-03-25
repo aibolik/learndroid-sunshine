@@ -47,6 +47,20 @@ public class ForecastFragment extends Fragment implements AdapterView.OnItemClic
     public ForecastFragment() {
     }
 
+    String columns[] = {
+            WeatherContract.WeatherEntry._ID,
+            WeatherContract.WeatherEntry.COLUMN_DATE,
+            WeatherContract.WeatherEntry.COLUMN_SHORT_DESC,
+            WeatherContract.WeatherEntry.COLUMN_MIN_TEMP,
+            WeatherContract.WeatherEntry.COLUMN_MAX_TEMP
+    };
+
+    public static final int COL_ID = 0;
+    public static final int COL_DATE = 1;
+    public static final int COL_SHORT_DESC = 2;
+    public static final int COL_MIN_TEMP = 3;
+    public static final int COL_MAX_TEMP = 4;
+
     ForecastAdapter mForecastAdapter;
     WeatherDbHelper dbHelper;
     SQLiteDatabase db;
@@ -65,13 +79,7 @@ public class ForecastFragment extends Fragment implements AdapterView.OnItemClic
 
         db = dbHelper.getReadableDatabase();
 
-        String columns[] = {
-                WeatherContract.WeatherEntry._ID,
-                WeatherContract.WeatherEntry.COLUMN_DATE,
-                WeatherContract.WeatherEntry.COLUMN_SHORT_DESC,
-                WeatherContract.WeatherEntry.COLUMN_MIN_TEMP,
-                WeatherContract.WeatherEntry.COLUMN_MAX_TEMP
-        };
+        long startDate = System.currentTimeMillis();
 
         Cursor locId = db.query(
                 WeatherContract.LocationEntry.TABLE_NAME,
@@ -88,29 +96,19 @@ public class ForecastFragment extends Fragment implements AdapterView.OnItemClic
         Cursor weatherData = db.query(
                 WeatherContract.WeatherEntry.TABLE_NAME,
                 columns,
-                WeatherContract.WeatherEntry.COLUMN_LOC_KEY + " = ?",
-                new String[] {String.valueOf(locationId)},
+                WeatherContract.WeatherEntry.COLUMN_LOC_KEY + " = ? AND " +
+                        WeatherContract.WeatherEntry.COLUMN_DATE + " >= ?",
+                new String[] {String.valueOf(locationId), String.valueOf(startDate)},
                 null,
                 null,
-                WeatherContract.WeatherEntry.COLUMN_DATE
+                WeatherContract.WeatherEntry.COLUMN_DATE + " ASC"
         );
-        //mForecastAdapter = new ArrayAdapter(getActivity(), R.layout.list_item_forecast, R.id.textview_forecast, weekForecast);
         mForecastAdapter = new ForecastAdapter(getActivity(), weatherData, 0);
 
         ListView forecast = (ListView) rootView.findViewById(R.id.listview_forecast);
         forecast.setAdapter(mForecastAdapter);
 
         forecast.setOnItemClickListener(this);
-//        forecast.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                //Toast.makeText(getActivity(), "Мы нажали на позицию " + position, Toast.LENGTH_LONG).show();
-//                Intent intent = new Intent(getActivity(), DetailActivity.class);
-//                String detailWeather = (String) mForecastAdapter.getItem(position);
-//                intent.putExtra(Intent.EXTRA_TEXT, detailWeather);
-//                startActivity(intent);
-//            }
-//        });
 
         return rootView;
     }
@@ -135,7 +133,7 @@ public class ForecastFragment extends Fragment implements AdapterView.OnItemClic
 
     private void updateWeather() {
         FetchWeatherTask task = new FetchWeatherTask(getActivity());
-        task.execute("Astana");
+        task.execute("Almaty");
     }
 
 
