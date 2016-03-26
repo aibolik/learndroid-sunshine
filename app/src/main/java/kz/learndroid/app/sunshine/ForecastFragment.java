@@ -52,7 +52,8 @@ public class ForecastFragment extends Fragment implements AdapterView.OnItemClic
             WeatherContract.WeatherEntry.COLUMN_DATE,
             WeatherContract.WeatherEntry.COLUMN_SHORT_DESC,
             WeatherContract.WeatherEntry.COLUMN_MIN_TEMP,
-            WeatherContract.WeatherEntry.COLUMN_MAX_TEMP
+            WeatherContract.WeatherEntry.COLUMN_MAX_TEMP,
+            WeatherContract.WeatherEntry.COLUMN_WEATHER_ID
     };
 
     public static final int COL_ID = 0;
@@ -60,6 +61,7 @@ public class ForecastFragment extends Fragment implements AdapterView.OnItemClic
     public static final int COL_SHORT_DESC = 2;
     public static final int COL_MIN_TEMP = 3;
     public static final int COL_MAX_TEMP = 4;
+    public static final int COL_WEATHER_ID = 5;
 
     ForecastAdapter mForecastAdapter;
     WeatherDbHelper dbHelper;

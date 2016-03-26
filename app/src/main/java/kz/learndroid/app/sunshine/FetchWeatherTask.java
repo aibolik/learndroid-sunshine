@@ -29,7 +29,8 @@ import kz.learndroid.app.sunshine.data.WeatherDbHelper;
 /**
  * Created by aibol on 3/17/16.
  */
-public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
+public class FetchWeatherTask extends AsyncTask<String, Void, String> {
+
 
     Context mContext;
 
@@ -94,7 +95,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
     }
 
     @Override
-    protected Void doInBackground(String... params) {
+    protected String doInBackground(String... params) {
 
         Log.d("AsyncTask", "Запущен");
 
@@ -193,9 +194,8 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
             }
         }
 
-        return null;
+        return "Ok";
     }
-
 //    @Override
 //    protected void onPostExecute(String[] result) {
 //        if(result != null) {
